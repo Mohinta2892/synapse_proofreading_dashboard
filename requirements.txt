@@ -26,7 +26,6 @@ build==0.9.0
 cached-property==1.5.2
 cachetools==5.2.0
 cachey==0.2.1
-caveclient==5.17.4
 certifi==2024.2.2
 cffi==1.16.0
 chardet==5.0.0
