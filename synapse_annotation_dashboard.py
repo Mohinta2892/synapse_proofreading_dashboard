@@ -621,7 +621,7 @@ with tab6:
     if example_type == "Good Synapses":
         with col1:
             display_catmaid_example(
-                "Example 1: Multiple-contact Synapse",
+                "Example 1: ",
                 image_path="./data/examples_images/good_synapse_neuron394147.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/ym86axf",
                 # description="Classic T-bar structure with multiple postsynaptic densities. Note the clear synaptic cleft and membrane specializations."
@@ -629,7 +629,7 @@ with tab6:
             )
             
             display_catmaid_example(
-                "Example 3: Clear T-bar",
+                "Example 2: ",
                 image_path="./data/examples_images/good_synapse_neuron416101.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/bla62bn",
                 # description="Synapse with multiple postsynaptic partners clearly visible."
@@ -638,7 +638,7 @@ with tab6:
             )
 
             display_catmaid_example(
-                "Example 3: Persistent T-bar across axes",
+                "Example 3: ",
                 image_path="./data/examples_images/good_synapse_neuron416117.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/w6ccxwv",
                 # description="Synapse with multiple postsynaptic partners clearly visible."
@@ -665,7 +665,7 @@ with tab6:
     elif example_type == "False Positives":
         with col1:
             display_catmaid_example(
-                "Example 1: Resembles a T-bar",
+                "Example 1:",
                 image_path="./data/examples_images/bad_synapse_neuron416164.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/tchji7f",
                 description="Marked by Albert as False Positives in Octo"
@@ -673,14 +673,14 @@ with tab6:
             )
 
             display_catmaid_example(
-                "Example 2: Dark T-bar and putative cleft",
+                "Example 2:",
                 image_path="./data/examples_images/bad_synapse_neuron416535.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/9jttfqh",
                 description="Marked by Albert as False Positives in Octo"
             )
             
             display_catmaid_example(
-                "Example 3: Resembles T-bar and PSD",
+                "Example 3:",
                 image_path="./data/examples_images/bad_synapse_neuron416806.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/ygfz9fb",
                 description="Marked by Albert as False Positives in Octo"
@@ -704,17 +704,17 @@ with tab6:
     else:  # Ambiguous Cases
         with col1:
             display_catmaid_example(
-                "Example 1: Potential Developing Synapse",
+                "Example 1: ",
                 image_path="./data/examples_images/ambiguous_neuron605629.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/18/links/52b72qi",
                 description="Potential developing synapse with some but not all characteristics of a mature synapse."
             )
             
             display_catmaid_example(
-                "Example 3: Oblique Section Through Synapse",
+                "Example 2: ",
                 image_path="./data/examples_images/ambiguous_neuron606017.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/18/links/5ictpti",
-                description="Oblique section through what might be a synapse, making classification difficult."
+                description="Marked by Albert as an uncertain case."
             )
             
         # with col2:
