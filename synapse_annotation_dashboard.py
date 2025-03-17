@@ -813,13 +813,5 @@ st.sidebar.download_button(
     mime="text/csv"
 )
 
-# Add download button for filtered data
-st.sidebar.download_button(
-    label="Download Filtered Data",
-    data=df[df['user'].isin(selected_users)].to_csv(index=False).encode('utf-8'),
-    file_name="filtered_synapse_data.csv",
-    mime="text/csv"
-)
-
 if __name__ == '__main__':
     pass
