@@ -800,7 +800,7 @@ st.sidebar.markdown(f"""
         <p style='font-size: 12px;'>Scan to open on mobile</p>
     </div>
     <div style='text-align: center; margin-top: 20px; font-size: 12px;'>
-        © 2023 University of Cambridge<br>
+        © 2025, Samia Mohinta, University of Cambridge<br>
         All rights reserved
     </div>
 """, unsafe_allow_html=True)
