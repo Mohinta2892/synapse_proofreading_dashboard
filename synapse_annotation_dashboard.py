@@ -528,7 +528,7 @@ with tab5:
     )
     
     # Create more meaningful visualizations
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(1)
     
     with col1:
         # Annotation count by user
