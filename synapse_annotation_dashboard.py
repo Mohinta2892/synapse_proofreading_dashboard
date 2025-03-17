@@ -601,8 +601,7 @@ with tab6:
     )
     
     # Create columns for better layout
-    # col1, col2 = st.columns(1)
-    col1 = st.columns(1)
+    col1, col2 = st.columns(2)
 
     # Function to display CATMAID URLs with context
     def display_catmaid_example(title, image_path=None, catmaid_url=None, description=None):
