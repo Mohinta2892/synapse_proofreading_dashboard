@@ -20,9 +20,9 @@ st.set_page_config(
 @st.cache_data
 def load_data(dataset_name):
     if dataset_name == "Octo False Positives":
-        df = pd.read_csv('/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/catmaid_tracker_plots/final_df_postsyn_transaction_octo.csv')
+        df = pd.read_csv('./data/final_df_postsyn_transaction_octo.csv')
     elif dataset_name == "MR143 False Positives":  # Add more datasets as needed
-        df = pd.read_csv('/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/catmaid_tracker_plots/final_df_postsyn_transaction_mr143.csv')
+        df = pd.read_csv('./data/final_df_postsyn_transaction_mr143.csv')
     
     # Convert execution_time to datetime
     df['execution_time'] = pd.to_datetime(df['execution_time'])
@@ -622,7 +622,7 @@ with tab6:
         with col1:
             display_catmaid_example(
                 "Example 1: Multiple-contact Synapse",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/good_synapse_neuron394147.png",
+                image_path="./data/examples_images/good_synapse_neuron394147.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/ym86axf",
                 # description="Classic T-bar structure with multiple postsynaptic densities. Note the clear synaptic cleft and membrane specializations."
                 description="Ground-Truth Synapse for Models."
@@ -630,7 +630,7 @@ with tab6:
             
             display_catmaid_example(
                 "Example 3: Clear T-bar",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/good_synapse_neuron416101.png",
+                image_path="./data/examples_images/good_synapse_neuron416101.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/bla62bn",
                 # description="Synapse with multiple postsynaptic partners clearly visible."
                 description="Ground-Truth Synapse for Models."
@@ -639,7 +639,7 @@ with tab6:
 
             display_catmaid_example(
                 "Example 3: Persistent T-bar across axes",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/good_synapse_neuron416117.png",
+                image_path="./data/examples_images/good_synapse_neuron416117.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/w6ccxwv",
                 # description="Synapse with multiple postsynaptic partners clearly visible."
                 description="Ground-Truth Synapse for Models."
@@ -666,7 +666,7 @@ with tab6:
         with col1:
             display_catmaid_example(
                 "Example 1: Resembles a T-bar",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/bad_synapse_neuron416164.png",
+                image_path="./data/examples_images/bad_synapse_neuron416164.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/tchji7f",
                 description="Marked by Albert as False Positives in Octo"
                 # description="Dense core vesicle that might be mistaken for a small T-bar. Note the lack of synaptic cleft and postsynaptic density."
@@ -674,14 +674,14 @@ with tab6:
 
             display_catmaid_example(
                 "Example 2: Dark T-bar and putative cleft",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/bad_synapse_neuron416535.png",
+                image_path="./data/examples_images/bad_synapse_neuron416535.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/9jttfqh",
                 description="Marked by Albert as False Positives in Octo"
             )
             
             display_catmaid_example(
                 "Example 3: Resembles T-bar and PSD",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/bad_synapse_neuron416806.png",
+                image_path="./data/examples_images/bad_synapse_neuron416806.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/9/links/ygfz9fb",
                 description="Marked by Albert as False Positives in Octo"
             )
@@ -705,14 +705,14 @@ with tab6:
         with col1:
             display_catmaid_example(
                 "Example 1: Potential Developing Synapse",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/ambiguous_neuron605629.png",
+                image_path="./data/examples_images/ambiguous_neuron605629.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/18/links/52b72qi",
                 description="Potential developing synapse with some but not all characteristics of a mature synapse."
             )
             
             display_catmaid_example(
                 "Example 3: Oblique Section Through Synapse",
-                image_path="/Users/sam/Library/CloudStorage/OneDrive-UniversityofCambridge/Synapse_localisation/synapse_curation/examples_images/ambiguous_neuron606017.png",
+                image_path="./data/examples_images/ambiguous_neuron606017.png",
                 catmaid_url="https://neurophyla.mrc-lmb.cam.ac.uk/catmaid/fibsem/18/links/5ictpti",
                 description="Oblique section through what might be a synapse, making classification difficult."
             )
