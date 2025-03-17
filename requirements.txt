@@ -39,7 +39,6 @@ colorcet==3.1.0
 comm==0.2.2
 commonmark==0.9.1
 compressed-segmentation==2.2.0
-compresso==3.0.0
 connectome_interpreter==2.3.0
 contourpy==1.2.1
 crackle-codec==0.11.0
