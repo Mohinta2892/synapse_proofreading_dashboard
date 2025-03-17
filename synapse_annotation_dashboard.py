@@ -36,7 +36,6 @@ with col2:
         "<p style='font-size: 14px; color: gray;'>© 2025, Samia Mohinta, University of Cambridge. All rights reserved.</p>",
         unsafe_allow_html=True)
 
-
 # Load data
 @st.cache_data
 def load_data(dataset_name):
@@ -408,6 +407,177 @@ def plot_user_overview(df, selected_users):
 
     return fig
 
+
+def plot_classification_breakdown(df, selected_users):
+    """
+    Create a plot showing the percentage breakdown of synapse classifications by user.
+    Classifications are mapped to standardized categories: correct, incorrect, uncertain/dubious.
+    """
+    # Create a copy of the dataframe to avoid modifying the original
+    analysis_df = df[df['user'].isin(selected_users)].copy()
+
+    # Debug: Print sample of other_annotations to understand format
+    st.write("Sample annotations:", analysis_df['other_annotations'].head(5).tolist())
+
+    # User initials mapping
+    user_mapping = {
+        'mc': 'mclayton',
+        'acs': 'acorreia',
+        'ad': 'adulac',
+        'sh': 'sharris',
+        'gmo': 'gmo',
+        'ngc': 'nceffa',
+        'sy': 'shiyan',
+        'sw': 'swilson',
+        'mr': 'mrobbins',
+        'ac': 'ac'  # Benchmark user
+    }
+
+    # Define mapping function to standardize annotation types
+    def map_annotation_type(row):
+        annotation_text = str(row['other_annotations']).lower() if pd.notna(row['other_annotations']) else ""
+
+        # Debug print for a few rows
+        if np.random.random() < 0.01:  # Print ~1% of rows for debugging
+            print(f"User: {row['user']}, Annotation: {annotation_text}")
+
+        # Special handling for benchmark user 'ac'
+        if row['user'] == 'acardona':
+            # If 'dubious' is present anywhere, prioritize it over other classifications
+            if 'dubious' in annotation_text:
+                return 'Uncertain/Dubious'
+            # Otherwise, check for other classifications
+            elif 'correct' in annotation_text and 'incorrect' not in annotation_text:
+                return 'Correct'
+            elif 'incorrect' in annotation_text:
+                return 'Incorrect'
+
+        # Direct mapping for common patterns
+        if 'pre correct' in annotation_text or (
+                'correct' in annotation_text and 'incorrect' not in annotation_text) or 'pushed to synapse' in annotation_text:
+            return 'Correct'
+        elif 'wrong set' in annotation_text or 'incorrect' in annotation_text:
+            return 'Incorrect'
+        elif 'distanced set' in annotation_text or 'distance set' in annotation_text:
+            return 'Incorrect'  # Counting distanced as incorrect
+        elif 'uncertain' in annotation_text or 'dubious' in annotation_text:
+            return 'Uncertain/Dubious'
+
+        # If we get here, try to parse the format "user: annotation_type"
+        if ':' in annotation_text:
+            parts = annotation_text.split(':', 1)
+            if len(parts) == 2:
+                user_initial = parts[0].strip()
+                annotation = parts[1].strip()
+
+                # Special case for 'ac' user annotations
+                if user_initial == 'acardona' and 'dubious' in annotation:
+                    return 'Uncertain/Dubious'
+                if 'pre correct' in annotation or (
+                        'correct' in annotation and 'incorrect' not in annotation) or 'pushed to synapse' in annotation:
+                    return 'Correct'
+                elif 'wrong set' in annotation or 'incorrect' in annotation:
+                    return 'Incorrect'
+                elif 'distanced set' in annotation or 'distance set' in annotation:
+                    return 'Incorrect'
+                elif 'uncertain' in annotation or 'dubious' in annotation or 'unknown' in annotation:
+                    return 'Uncertain/Dubious'
+            elif len(parts) == 1:
+                if 'uncertain' in annotation or 'dubious' in annotation or 'unknown' in annotation:
+                    return 'Uncertain/Dubious'
+
+        # Default case for unrecognized formats
+        return 'Other'
+
+    # Apply mapping to get standardized categories
+    analysis_df['classification'] = analysis_df.apply(map_annotation_type, axis=1)
+
+    # Debug: Show distribution of classifications
+    st.write("Classification distribution:", analysis_df['classification'].value_counts())
+
+    # Group by user and classification to get counts
+    classification_counts = analysis_df.groupby(['user', 'classification']).size().reset_index(name='count')
+
+    # Debug: Print classification counts
+    st.write("Classification counts by user:", classification_counts)
+
+    # Calculate total annotations per user
+    user_totals = classification_counts.groupby('user')['count'].sum().reset_index(name='total')
+
+    # Merge to get percentages
+    classification_pct = pd.merge(classification_counts, user_totals, on='user')
+    classification_pct['percentage'] = (classification_pct['count'] / classification_pct['total'] * 100).round(1)
+
+    # Calculate average percentage for 'Correct' classifications
+    correct_avg = classification_pct[classification_pct['classification'] == 'Correct']['percentage'].mean()
+
+    # Create the plot
+    fig = px.bar(
+        classification_pct,
+        x='user',
+        y='percentage',
+        color='classification',
+        color_discrete_map={
+            'Correct': '#4CAF50',  # Green
+            'Incorrect': '#F44336',  # Red
+            'Uncertain/Dubious': '#FFC107',  # Amber
+            'Other': '#9E9E9E'  # Gray
+        },
+        title='Synapse Classification Breakdown by User',
+        labels={
+            'user': 'User',
+            'percentage': 'Percentage (%)',
+            'classification': 'Classification'
+        },
+        template='plotly_dark',
+        barmode='stack'
+    )
+    # Add average line for 'Correct' classifications
+    fig.add_shape(
+        type="line",
+        x0=-0.5,  # Start before first bar
+        y0=correct_avg,
+        x1=len(classification_pct['user'].unique()) - 0.5,  # End after last bar
+        y1=correct_avg,
+        line=dict(
+            color="#FFFFFF",
+            width=2,
+            dash="dash",
+        ),
+    )
+
+    # Add annotation for the average line
+    fig.add_annotation(
+        x=len(classification_pct['user'].unique()) - 0.5,  # Position at the end
+        y=correct_avg,
+        text=f"Avg Correct: {correct_avg:.1f}%",
+        showarrow=False,
+        font=dict(
+            size=12,
+            color="#FFFFFF"
+        ),
+        bgcolor="rgba(0,0,0,0.6)",
+        bordercolor="#FFFFFF",
+        borderwidth=1,
+        borderpad=4,
+        xshift=10
+    )
+
+    # Customize layout
+    fig.update_layout(
+        xaxis_tickangle=45,
+        legend_title_text='Classification',
+        height=500,
+        yaxis=dict(
+            title='Percentage (%)',
+            range=[0, 100],
+            gridcolor='rgba(255, 255, 255, 0.2)',
+            gridwidth=1,
+            griddash='dash'
+        )
+    )
+
+    return fig
 
 def plot_cube_details(df, selected_cube_number, selected_users):
     # cube_data = df[
@@ -895,6 +1065,18 @@ with tab5:
     with col3:
         median_annotations = int(filtered_df.groupby('user').size().median())
         st.metric("Median Annotations per User", median_annotations)
+
+    # Add synapse classification breakdown
+    st.subheader("Synapse Classification Breakdown")
+    st.markdown("""
+    This chart shows how each user classifies synapses as a percentage of their total annotations:
+    - **Correct**: Includes 'pre correct', 'correct', 'pushed to synapse'
+    - **Incorrect**: Includes 'wrong set', 'incorrect', 'distanced set'
+    - **Uncertain/Dubious**: Includes 'uncertain', 'dubious'
+    """)
+
+    classification_fig = plot_classification_breakdown(df, selected_users)
+    st.plotly_chart(classification_fig, use_container_width=True)
 
     # Add more detailed statistics
     st.subheader("User Activity Breakdown")
