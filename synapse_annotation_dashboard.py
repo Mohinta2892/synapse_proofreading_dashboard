@@ -114,7 +114,7 @@ def plot_user_overview(df, selected_users):
     fig.update_layout(
         template='plotly_dark',
         title=f'Review contributions by users on {selected_dataset}',
-        title_x=0.5,
+        title_x=1,
         title_font_size=20,
         xaxis_title='User',
         yaxis_title='Number of transactions',
