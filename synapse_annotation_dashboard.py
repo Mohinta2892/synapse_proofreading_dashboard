@@ -8,13 +8,31 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.dates import DateFormatter 
 
+# Generate QR code for the app
+import qrcode
+from PIL import Image
+import io
+import base64
 
-# Set page config
-st.set_page_config(
-    page_title="Synapse Annotation Dashboard",
-    page_icon="🧠",
-    layout="wide"
-)
+
+# # Set page config
+# st.set_page_config(
+#     page_title="Synapse Annotation Dashboard",
+#     page_icon="🧠",
+#     layout="wide"
+# )
+
+# Add logo and title in a row
+col1, col2 = st.columns([1, 4])
+
+with col1:
+    # Add your logo - replace with your actual logo path
+    st.image("./data/logo/catena_logo.png", width=120)
+
+with col2:
+    st.title(" Synapse Proofreading Analysis Dashboard")
+    st.markdown("<p style='font-size: 14px; color: gray;'>© 2025, Samia Mohinta, University of Cambridge. All rights reserved.</p>", unsafe_allow_html=True)
+
 
 # Load data
 @st.cache_data
@@ -55,10 +73,31 @@ selected_users = st.sidebar.multiselect(
 )
 
 # Main dashboard
-st.title("🧠 Synapse Annotation Analysis Dashboard")
+# st.title("🧠 Synapse Annotation Analysis Dashboard")
 
 # Create tabs for different visualizations
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Leaderboard", "Cube Analysis", "User Agreement", "Time Analysis", "Statistics", "Media Examples"])
+
+
+def generate_qr_code(url):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+
+    # Convert PIL image to bytes
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+
+    return img_str
+
 def plot_user_overview(df, selected_users):
     # Get user counts and sort
     user_counts = df[df['user'].isin(selected_users)].groupby('user').size().sort_values(ascending=False)
@@ -750,6 +789,29 @@ with tab6:
             # Code to save the example would go here
             # This would require file system access to save the image
             st.success("Example saved successfully!")
+
+# Replace with your actual app URL
+app_url = "https://synapse-proofreading-dashboard.streamlit.app"
+qr_img = generate_qr_code(app_url)
+
+st.sidebar.markdown(f"""
+    <div style='text-align: center;'>
+        <img src='data:image/png;base64,{qr_img}' width='180'>
+        <p style='font-size: 12px;'>Scan to open on mobile</p>
+    </div>
+    <div style='text-align: center; margin-top: 20px; font-size: 12px;'>
+        © 2023 University of Cambridge<br>
+        All rights reserved
+    </div>
+""", unsafe_allow_html=True)
+
+# Add download button for filtered data
+st.sidebar.download_button(
+    label="Download Filtered Data",
+    data=df[df['user'].isin(selected_users)].to_csv(index=False).encode('utf-8'),
+    file_name="filtered_synapse_data.csv",
+    mime="text/csv"
+)
 
 # Add download button for filtered data
 st.sidebar.download_button(
