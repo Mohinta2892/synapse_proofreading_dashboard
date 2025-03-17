@@ -528,7 +528,7 @@ with tab5:
     )
     
     # Create more meaningful visualizations
-    col1, col2 = st.columns(1)
+    col1, col2 = st.columns(2)
     
     with col1:
         # Annotation count by user
@@ -601,8 +601,9 @@ with tab6:
     )
     
     # Create columns for better layout
-    col1, col2 = st.columns(2)
-    
+    # col1, col2 = st.columns(1)
+    col1 = st.columns(1)
+
     # Function to display CATMAID URLs with context
     def display_catmaid_example(title, image_path=None, catmaid_url=None, description=None):
         st.subheader(title)
