@@ -31,7 +31,7 @@ with col1:
     st.image("./data/logo/catena_logo.png", width=120)
 
 with col2:
-    st.title(" Synapse Proofreading Analysis Dashboard")
+    st.title(" Synapse Proofreading Dashboard")
     st.markdown(
         "<p style='font-size: 14px; color: gray;'>© 2025, Samia Mohinta, University of Cambridge. All rights reserved.</p>",
         unsafe_allow_html=True)
