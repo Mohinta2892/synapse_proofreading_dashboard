@@ -6,3 +6,4 @@ plotly
 scikit-image
 scikit-learn
 seaborn
+qrcode
