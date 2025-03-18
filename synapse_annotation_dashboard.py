@@ -36,6 +36,7 @@ with col2:
         "<p style='font-size: 14px; color: gray;'>© 2025, Samia Mohinta, University of Cambridge. All rights reserved.</p>",
         unsafe_allow_html=True)
 
+
 # Load data
 @st.cache_data
 def load_data(dataset_name):
@@ -579,6 +580,218 @@ def plot_classification_breakdown(df, selected_users):
 
     return fig
 
+
+def plot_consensus_distribution(df, selected_cube, selected_users):
+    """
+    Create a distribution plot showing consensus agreement for each position in a selected cube.
+    Only includes positions with multiple users for true consensus analysis.
+
+    Parameters:
+    - df: DataFrame containing annotation data
+    - selected_cube: The cube number to analyze
+    - selected_users: List of users to include in the analysis
+
+    Returns:
+    - Plotly figure showing consensus distribution
+    - DataFrame with consensus data
+    """
+    # Filter data for the selected cube and users
+    cube_data = df[(df['cube_number'] == selected_cube) & (df['user'].isin(selected_users))].copy()
+
+    if cube_data.empty:
+        return None, pd.DataFrame()
+
+    # Group by position to analyze consensus
+    position_data = []
+
+    # Group by position coordinates
+    position_groups = {}
+    for pos, group in cube_data.groupby(['post_x', 'post_y', 'post_z']):
+        # Skip positions with only one user (no consensus possible)
+        if len(group['user'].unique()) <= 1:
+            continue
+        print(group.columns)
+        # Try to get neuron_id if available, otherwise use position coordinates
+        neuron_id = None
+        if 'name' in group.columns and not group['name'].isna().all():
+            neuron_id = group['name'].iloc[0]
+            position_id = f"{neuron_id}"
+        else:
+            position_id = f"pos_{pos[0]}_{pos[1]}_{pos[2]}"
+
+        # Store the group for later processing
+        position_groups[position_id] = {
+            'group': group,
+            'pos': pos,
+            'neuron_id': neuron_id
+        }
+
+    # Process each position group
+    for position_id, data in position_groups.items():
+        group = data['group']
+        pos = data['pos']
+
+        # Count classifications for this position
+        classifications = []
+        user_annotations = {}  # Store what each user said
+
+        for _, row in group.iterrows():
+            user = row['user']
+            annotation_text = str(row['other_annotations']).lower() if pd.notna(row['other_annotations']) else ""
+
+            if 'pre correct' in annotation_text or (
+                    'correct' in annotation_text and 'incorrect' not in annotation_text) or 'pushed to synapse' in annotation_text:
+                classification = 'Correct'
+            elif 'wrong set' in annotation_text or 'incorrect' in annotation_text or 'distanced set' in annotation_text:
+                classification = 'Incorrect'
+            elif 'uncertain' in annotation_text or 'dubious' in annotation_text:
+                classification = 'Uncertain/Dubious'
+            else:
+                classification = 'Other'
+
+            classifications.append(classification)
+
+            # Store what this user said
+            if user not in user_annotations:
+                user_annotations[user] = classification
+
+        # Count occurrences of each classification
+        class_counts = {
+            'Correct': classifications.count('Correct'),
+            'Incorrect': classifications.count('Incorrect'),
+            'Uncertain/Dubious': classifications.count('Uncertain/Dubious'),
+            'Other': classifications.count('Other')
+        }
+
+        # Determine majority vote
+        max_count = max(class_counts.values())
+        majority_classes = [c for c, count in class_counts.items() if count == max_count]
+        majority_vote = majority_classes[0] if len(majority_classes) == 1 else 'Tie'
+
+        # Calculate consensus percentage
+        total_votes = sum(class_counts.values())
+        consensus_pct = (max_count / total_votes * 100) if total_votes > 0 else 0
+
+        # Format user annotations for hover text
+        user_annotations_text = "<br>".join([f"{user}: {annot}" for user, annot in user_annotations.items()])
+
+        # Store position data
+        position_data.append({
+            'position_id': position_id,
+            'total_annotations': total_votes,
+            'correct_count': class_counts['Correct'],
+            'incorrect_count': class_counts['Incorrect'],
+            'uncertain_count': class_counts['Uncertain/Dubious'],
+            'other_count': class_counts['Other'],
+            'majority_vote': majority_vote,
+            'consensus_pct': consensus_pct,
+            'x_coord': pos[0],
+            'y_coord': pos[1],
+            'z_coord': pos[2],
+            'neuron_id': data['neuron_id'],
+            'user_annotations': user_annotations_text,
+            'num_users': len(user_annotations)
+        })
+
+    # Convert to DataFrame
+    consensus_df = pd.DataFrame(position_data)
+
+    if consensus_df.empty:
+        return None, pd.DataFrame()
+
+    # Sort by position_id for consistent display
+    consensus_df = consensus_df.sort_values('position_id')
+
+    # Create the plot
+    fig = go.Figure()
+
+    # Add bars for each classification type
+    classification_colors = {
+        'Correct': '#4CAF50',  # Green
+        'Incorrect': '#F44336',  # Red
+        'Uncertain/Dubious': '#FFC107',  # Amber
+        'Other': '#9E9E9E'  # Gray
+    }
+
+    # Add a trace for each classification type
+    for classification, color in classification_colors.items():
+        count_col = f"{classification.lower().replace('/', '_')}_count"
+        if count_col not in consensus_df.columns:
+            # Handle the special case for uncertain/dubious
+            if classification == 'Uncertain/Dubious':
+                count_col = 'uncertain_count'
+
+        if count_col in consensus_df.columns:
+            fig.add_trace(go.Bar(
+                x=consensus_df['position_id'],
+                y=consensus_df[count_col],
+                name=classification,
+                marker_color=color,
+                hovertemplate='Position: %{x}<br>' +
+                              f'{classification}: %{{y}}<br>' +
+                              'Total: %{customdata[0]}<br>' +
+                              'Consensus: %{customdata[1]:.1f}%<br>' +
+                              'Majority: %{customdata[2]}<br>' +
+                              'Users (%{customdata[3]}):<br>%{customdata[4]}',
+                customdata=np.column_stack((
+                    consensus_df['total_annotations'],
+                    consensus_df['consensus_pct'],
+                    consensus_df['majority_vote'],
+                    consensus_df['num_users'],
+                    consensus_df['user_annotations']
+                ))
+            ))
+
+    # Add a line for consensus percentage
+    fig.add_trace(go.Scatter(
+        x=consensus_df['position_id'],
+        y=consensus_df['consensus_pct'],
+        mode='lines+markers',
+        name='Consensus %',
+        line=dict(color='white', width=2),
+        marker=dict(size=8, symbol='diamond'),
+        yaxis='y2',
+        hovertemplate='Position: %{x}<br>' +
+                      'Consensus: %{y:.1f}%<br>' +
+                      'Majority: %{customdata[0]}<br>' +
+                      'Users (%{customdata[1]}):<br>%{customdata[2]}',
+        customdata=np.column_stack((
+            consensus_df['majority_vote'],
+            consensus_df['num_users'],
+            consensus_df['user_annotations']
+        ))
+    ))
+
+    # Update layout
+    fig.update_layout(
+        title=f'Classification Consensus Distribution for {selected_cube}',
+        xaxis_title='Neuron ID / Position',
+        yaxis_title='Count',
+        barmode='stack',
+        template='plotly_dark',
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        yaxis2=dict(
+            title='Consensus %',
+            titlefont=dict(color='white'),
+            tickfont=dict(color='white'),
+            overlaying='y',
+            side='right',
+            range=[0, 100]
+        ),
+        hovermode='closest'
+    )
+
+    print(consensus_df)
+
+    return fig, consensus_df
+
+
 def plot_cube_details(df, selected_cube_number, selected_users):
     # cube_data = df[
     #     (df['cube'] == selected_cube) &
@@ -852,6 +1065,36 @@ with tab2:
         # Show temporal distribution
         st.plotly_chart(temporal_fig, use_container_width=True)
 
+        # Add consensus distribution plot
+        st.subheader("Classification Consensus Distribution")
+        st.markdown("""
+        This plot shows how users classified each position in the selected cube:
+        - **Stacked bars**: Show the count of each classification type per position
+        - **White line**: Shows the consensus percentage (agreement among users)
+        - **Hover** over elements to see detailed information
+        """)
+
+        consensus_fig, consensus_data = plot_consensus_distribution(df, selected_cube, selected_users)
+        if consensus_fig is not None:
+            st.plotly_chart(consensus_fig, use_container_width=True)
+
+            # Add option to show consensus data table
+            if not consensus_data.empty and st.checkbox("Show consensus data table"):
+                # Format the table for better display
+                display_data = consensus_data.copy()
+                display_data['consensus_pct'] = display_data['consensus_pct'].round(1).astype(str) + '%'
+                display_data = display_data[[
+                    'position_id', 'majority_vote', 'consensus_pct', 'total_annotations',
+                    'correct_count', 'incorrect_count', 'uncertain_count', 'other_count'
+                ]]
+                display_data.columns = [
+                    'Position ID', 'Majority Vote', 'Consensus %', 'Total Annotations',
+                    'Correct', 'Incorrect', 'Uncertain/Dubious', 'Other'
+                ]
+                st.dataframe(display_data, use_container_width=True)
+        else:
+            st.info("No consensus data available for the selected cube and users.")
+
         # Show agreement details
         st.subheader("Position Agreement Details")
         agreement_data = df[df['cube_number'] == selected_cube].groupby(['post_x', 'post_y', 'post_z']).agg({
@@ -909,6 +1152,14 @@ with tab3:
     - Higher percentages (green) indicate stronger agreement with the benchmark.
     - Lower percentages (red) indicate areas where users differ from the benchmark.
     - The analysis is broken down by annotation type (correct, incorrect, dubious).
+
+    **Calculation Method:**
+    1. For each synapse position, we compare what the benchmark user (ac) classified it as
+    2. We then check what other users classified the same position as
+    3. Agreement % = (Number of matching classifications / Total classifications) × 100
+
+    **Example:** If ac marks a synapse as 'correct' and user X also marks it as 'correct',
+    this counts as agreement. If user X marks it as 'incorrect', this counts as disagreement.
     """)
 
     # Define data directory for benchmark files
