@@ -128,8 +128,8 @@ def plot_user_agreement(df, selected_users):
     mapping = {
         'pre correct': 'correct',
         'uncertain': 'dubious',
-        'pushed false positives synapses': 'incorrect',
-        'pushed to synapse': 'correct',
+        # 'pushed false positives synapses': 'incorrect',
+        # 'pushed to synapse': 'correct',
         'distanced set': 'incorrect',
         'wrong set': 'incorrect',
         # Add more mappings if needed
@@ -454,7 +454,7 @@ def plot_classification_breakdown(df, selected_users):
 
         # Direct mapping for common patterns
         if 'pre correct' in annotation_text or (
-                'correct' in annotation_text and 'incorrect' not in annotation_text) or 'pushed to synapse' in annotation_text:
+                'correct' in annotation_text and 'incorrect' not in annotation_text):
             return 'Correct'
         elif 'wrong set' in annotation_text or 'incorrect' in annotation_text:
             return 'Incorrect'
@@ -474,7 +474,7 @@ def plot_classification_breakdown(df, selected_users):
                 if user_initial == 'acardona' and 'dubious' in annotation:
                     return 'Uncertain/Dubious'
                 if 'pre correct' in annotation or (
-                        'correct' in annotation and 'incorrect' not in annotation) or 'pushed to synapse' in annotation:
+                        'correct' in annotation and 'incorrect' not in annotation):
                     return 'Correct'
                 elif 'wrong set' in annotation or 'incorrect' in annotation:
                     return 'Incorrect'
@@ -1070,7 +1070,7 @@ with tab5:
     st.subheader("Synapse Classification Breakdown")
     st.markdown("""
     This chart shows how each user classifies synapses as a percentage of their total annotations:
-    - **Correct**: Includes 'pre correct', 'correct', 'pushed to synapse'
+    - **Correct**: Includes 'pre correct', 'correct'
     - **Incorrect**: Includes 'wrong set', 'incorrect', 'distanced set'
     - **Uncertain/Dubious**: Includes 'uncertain', 'dubious'
     """)
