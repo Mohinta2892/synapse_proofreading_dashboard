@@ -704,7 +704,7 @@ def plot_consensus_distribution(df, selected_cube, selected_users):
         ),
         yaxis2=dict(
             title='Consensus %',
-            titlefont=dict(color='white'),
+            title_font=dict(color='white'),
             tickfont=dict(color='white'),
             overlaying='y',
             side='right',
