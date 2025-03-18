@@ -536,7 +536,7 @@ def plot_consensus_distribution(df, selected_cube, selected_users):
         # Skip positions with only one user (no consensus possible)
         if len(group['user'].unique()) <= 1:
             continue
-        print(group.columns)
+        # print(group.columns)
         # Try to get neuron_id if available, otherwise use position coordinates
         neuron_id = None
         if 'name' in group.columns and not group['name'].isna().all():
